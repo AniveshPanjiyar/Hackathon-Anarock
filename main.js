@@ -231,28 +231,53 @@ function calculateDrawings(lines) {
   for (var i = 0; i < lines.length; i++) {
     var line = lines[i];
     // Extract the corner data for the start and end points of the line
-    var corner1 = { x: line.x1, y: line.y1 };
-    var corner2 = { x: line.x2, y: line.y2 };
+    var corner1 = { x: line.startX , y: line.startY };
+    var corner2 = { x: line.endX, y: line.endY };
 
     // Add the corners to the corners array if they don't exist already
-    var corner1Index = getCornerIndex(data.corners, corner1);
-    if (corner1Index == -1) {
-      corner1Index = data.corners.length;
       data.corners.push(corner1);
-    }
-    var corner2Index = getCornerIndex(data.corners, corner2);
-    if (corner2Index == -1) {
-      corner2Index = data.corners.length;
       data.corners.push(corner2);
-    }
 
+      corner1Index =getCornerIndex(data.corners,corner1)
+      corner2Index =getCornerIndex(data.corners,corner2)
     // Add the wall to the walls array
     var wall = { corner1: corner1Index, corner2: corner2Index };
     data.walls.push(wall);
 
+
+    
   }
+
+
+  
   return data;
 }
+
+function getCorners() {
+  const corners = [];
+  for (const line of lines) {
+    const { startX, startY, endX, endY } = line;
+    corners.push({ x: startX, y: startY });
+    corners.push({ x: endX, y: endY });
+  }
+  // Remove duplicates
+  return corners.filter((corner, index) => {
+    return corners.findIndex(c => c.x === corner.x && c.y === corner.y) === index;
+  });
+}
+
+function getWalls() {
+  const corners = getCorners();
+  const walls = [];
+  for (const line of lines) {
+    const { startX, startY, endX, endY } = line;
+    const corner1 = corners.findIndex(c => c.x === startX && c.y === startY);
+    const corner2 = corners.findIndex(c => c.x === endX && c.y === endY);
+    walls.push({ corner1, corner2 });
+  }
+  return walls;
+}
+
 
 
 
@@ -263,13 +288,15 @@ document.getElementById('download-btn').addEventListener('click', function () {
 
   var result = [];
 
+  
   all_combination = getAllCombinations(lines)
+  console.log(all_combination)
 
   for (var i = 0; i < all_combination.length; i++) {
     result.push(calculateDrawings(all_combination[i]))
   }
-
-
+  
+console.log(result)
   // Convert the data to JSON format
   var jsonData = JSON.stringify(result);
 
